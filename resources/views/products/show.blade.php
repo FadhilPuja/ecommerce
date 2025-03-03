@@ -3,14 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard</title>
-
-
+    <title>Detail Produk</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-
+    
     <style>
-        /* Sidebar Styling */
         .sidebar {
             width: 250px;
             height: 100vh;
@@ -32,16 +29,14 @@
             border-radius: 5px;
         }
         .content {
-            margin-left: 260px; /* Hindari tertutup sidebar */
+            margin-left: 260px;
             padding: 20px;
         }
-        .profile-image {
-            display: block;
-            margin: 0 auto;
-            border-radius: 50%;
-            width: 100px;
-            height: 100px;
+        .product-image {
+            width: 250px;
+            height: 250px;
             object-fit: cover;
+            border-radius: 5px;
         }
     </style>
 </head>
@@ -51,7 +46,6 @@
     <div class="sidebar">
         <h4 class="text-center">Admin Panel</h4>
         <hr>
-
         <a href="{{ route('dashboard.index') }}"><i class="fa fa-home"></i> Dashboard</a>
         <a href="{{ route('products.index') }}"><i class="fa fa-box"></i> Products</a>
         <a href="{{ route('category.index') }}"><i class="fa fa-list"></i> Categories</a>
@@ -59,35 +53,25 @@
         <a href=""><i class="fa fa-users"></i> Customers</a>
         <a href="#"><i class="fa fa-chart-line"></i> Report</a>
         <a href="#"><i class="fa fa-gear"></i> Setting</a>
-
         <hr>
-        <form action="{{ route('auth.logout') }}" method="POST" class="d-grid">
+        <form action="{{ route('auth.logout') }}" method="POST" class="d-grid p-2">
             @csrf
-            <button type="submit" class="btn btn-danger"><i class="fa fa-sign-out-alt"></i> Logout</button>
+            <button type="submit" class="btn btn-danger btn-sm">Logout</button>
         </form>
     </div>
 
     <!-- Content -->
     <div class="content">
-        <div class="container mt-5">
-            <div class="row justify-content-center">
-                <div class="col-md-8">
-                    <div class="card">
-                        <div class="card-header text-center">
-                            <h4>Welcome to Dashboard</h4>
-                        </div>
-                        <div class="card-body text-center">
-                            <p>Hello, <strong>{{ Auth::user()->name }}</strong></p>
-                            <p>Your email: <strong>{{ Auth::user()->email }}</strong></p>
-
-                            <p><strong>Profile Image:</strong></p>
-                            @if(Auth::user()->image_url)
-                                <img src="{{ asset('storage/' . Auth::user()->image_url) }}" alt="Profile Image" class="profile-image">
-                            @else
-                                <p>No profile image uploaded.</p>
-                            @endif
-                        </div>
-                    </div>
+        <div class="container mt-4">
+            <h2>Detail Produk</h2>
+            <div class="card border-0 shadow rounded">
+                <div class="card-body text-center">
+                    <img src="{{ asset('storage/' . $products->image_url) }}" class="product-image" alt="Product Image">
+                    <h3 class="mt-3">{{ $products->name }}</h3>
+                    <p class="text-muted">{{ $products->description }}</p>
+                    <h5 class="text-success">Rp{{ number_format($products->price, 0, ',', '.') }}</h5>
+                    <p><strong>Stok:</strong> {{ $products->stock }}</p>
+                    <a href="{{ route('products.index') }}" class="btn btn-secondary mt-3">Kembali</a>
                 </div>
             </div>
         </div>
