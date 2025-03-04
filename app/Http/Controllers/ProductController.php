@@ -16,7 +16,7 @@ class ProductController extends Controller
     {
         $products = Product::paginate(10);
 
-        return view('products.index', compact('products'));
+        return view('admin.products.index', compact('products'));
     }
 
     /**
@@ -24,7 +24,7 @@ class ProductController extends Controller
      */
     public function create()
     {
-        return view('products.create');
+        return view('admin.products.create');
     }
 
     /**
@@ -54,7 +54,7 @@ class ProductController extends Controller
     {
         $products = Product::find($id);
 
-        return view('products.show', compact('products'));
+        return view('admin.products.show', compact('products'));
     }
 
     /**
@@ -64,7 +64,7 @@ class ProductController extends Controller
     {
         $products = Product::find($id);
 
-        return view('products.edit', compact('products'));
+        return view('admin.products.edit', compact('products'));
     }
 
     /**
@@ -100,7 +100,7 @@ class ProductController extends Controller
      */
     public function destroy($id)
     {
-        $product = Product::find($id);        
+        $product = Product::find($id);
 
         Storage::delete('public/' . $product->image_url);
 

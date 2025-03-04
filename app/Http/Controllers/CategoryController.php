@@ -15,7 +15,7 @@ class CategoryController extends Controller
     {
         $categories = Category::paginate(10);
 
-        return view('category.index', compact('categories'));
+        return view('admin.category.index', compact('categories'));
     }
 
     /**
@@ -23,7 +23,7 @@ class CategoryController extends Controller
      */
     public function create()
     {
-        return view('category.create');
+        return view('admin.category.create');
     }
 
     /**
@@ -31,8 +31,8 @@ class CategoryController extends Controller
      */
     public function store(Request $request)
     {
-        $validatedData = $request->validate([    
-            'name' => ['required', 'string', 'max:255'],        
+        $validatedData = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
         ]);
 
         Category::create($validatedData);
@@ -45,7 +45,7 @@ class CategoryController extends Controller
      */
     public function show(string $id)
     {
-        
+
     }
 
     /**
@@ -53,7 +53,7 @@ class CategoryController extends Controller
      */
     public function edit(string $id)
     {
-        return view('category.edit', compact('categories'));
+        return view('admin.category.edit', compact('categories'));
     }
 
     /**
@@ -73,10 +73,12 @@ class CategoryController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Category $categories)
+    public function destroy($id)
     {
+        $categories = Category::find($id);
+
         $categories->delete();
 
-        return back()->with('success', 'Category deleted successfully');
+        return back()->with('success', 'Product deleted successfully');
     }
 }

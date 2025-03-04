@@ -19,10 +19,11 @@ return new class extends Migration
             $table->string('email');
             $table->string('password');
             $table->string('phone_number');
-            $table->boolean('gender')->default(true);
+            $table->enum('gender', ['male', 'female', 'other']);
             $table->date('birth_date');
             $table->string('address');
-
+            $table->enum('role', ['admin', 'customer'])->default('customer');
+            
             $table->timestamps();
         });
     }

@@ -1,6 +1,8 @@
 <?php
 
+use App\Http\Controllers\CartController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProductController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
@@ -34,21 +36,33 @@ Route::prefix('auth')->name('auth.')->group(function (){
 
 Route::middleware('auth')->group(function() {
 
-    Route::prefix('dashboard')->name('dashboard.')->group(function(){
-        Route::get('/', [UserController::class, 'dashboard'])->name('index');
+    Route::get('/dashboard', [UserController::class, 'dashboard'])->name('dashboard.index');
+
+    Route::prefix('customer/home')->name('home.')->group(function(){
+        Route::get('/index', [HomeController::class, 'index'])->name('index');
+        Route::get('/show/{id}', [HomeController::class, 'show'])->name('show');
     });
-    Route::prefix('category')->name('category.')->group(function(){
-        Route::get('/index', [CategoryController::class, 'index'])->name('index');
-        Route::get('/create', [CategoryController::class, 'create'])->name('create');
-        Route::post('/create', [CategoryController::class, 'store'])->name('store');
+
+    Route::prefix('customer/cart')->name('cart.')->group(function(){
+        Route::get('/index', [CartController::class, 'index'])->name('index');
     });
-    Route::prefix('products')->name('products.')->group(function(){
-        Route::get('/index', [ProductController::class, 'index'])->name('index');
-        Route::get('/create', [ProductController::class, 'create'])->name('create');
-        Route::post('/create', [ProductController::class, 'store'])->name('store');
-        Route::get('/{id}', [ProductController::class, 'show'])->name('show');
-        Route::get('/{id}/edit', [ProductController::class, 'edit'])->name('edit');
-        Route::put('/{id}', [ProductController::class, 'update'])->name('update');
-        Route::delete('/{id}', [ProductController::class, 'destroy'])->name('destroy');
+
+    Route::middleware(['admin'])->group(function() {
+        Route::prefix('admin/category')->name('category.')->group(function(){
+            Route::get('/index', [CategoryController::class, 'index'])->name('index');
+            Route::get('/create', [CategoryController::class, 'create'])->name('create');
+            Route::post('/create', [CategoryController::class, 'store'])->name('store');
+            Route::delete('/{id}', [CategoryController::class, 'destroy'])->name('destroy');
+        });
+
+        Route::prefix('admin/products')->name('products.')->group(function(){
+            Route::get('/index', [ProductController::class, 'index'])->name('index');
+            Route::get('/create', [ProductController::class, 'create'])->name('create');
+            Route::post('/create', [ProductController::class, 'store'])->name('store');
+            Route::get('/{id}', [ProductController::class, 'show'])->name('show');
+            Route::get('/{id}/edit', [ProductController::class, 'edit'])->name('edit');
+            Route::put('/{id}', [ProductController::class, 'update'])->name('update');
+            Route::delete('/{id}', [ProductController::class, 'destroy'])->name('destroy');
+        });
     });
 });
