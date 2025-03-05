@@ -1,31 +1,27 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api;
 
-use App\Models\Category;
-use App\Models\Product;
+use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Routing\Controller;
 
-class HomeController extends Controller
+class CartController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request)
+    public function add(Request $request)
     {
-        $categories = Category::all();
-        $products = Product::query();
+        $validatedData = $request->validate([
+            'product_id' => ['required', 'exists:product,id'],
+            'quantity' => ['required', 'integer', 'min:1'],
+        ]);
 
-        if ($request->has('search') && $request->search != '') {
-            $products = $products->where('name', 'like', '%' . $request->search . '%');
-        }
+        $user = User::user();
 
-        $products = $products->get();
-
-        return view('customer.home.index', compact('categories', 'products'));
+        // $cartitem
     }
-
 
     /**
      * Show the form for creating a new resource.
@@ -48,15 +44,8 @@ class HomeController extends Controller
      */
     public function show(string $id)
     {
-        $product = Product::find($id);
-
-        if (!$product) {
-            return redirect()->route('home.index')->with('error', 'Produk tidak ditemukan.');
-        }
-
-        return view('customer.home.show', compact('product'));
+        //
     }
-
 
     /**
      * Show the form for editing the specified resource.

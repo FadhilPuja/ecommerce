@@ -16,4 +16,8 @@ class Product extends Model
         'stock',
         'image_url',        
     ];
+
+    public function Category(){
+        return $this->belongsTo(Category::class);
+    }
 }
