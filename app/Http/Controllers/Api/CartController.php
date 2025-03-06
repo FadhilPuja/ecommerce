@@ -3,71 +3,37 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Cart;
+use App\Models\Cart_Item;
+use App\Models\Product;
 use App\Models\User;
 use Illuminate\Http\Request;
 
 class CartController extends Controller
-{
-    /**
-     * Display a listing of the resource.
-     */
-    public function add(Request $request)
+{    
+    public function index()
     {
-        $validatedData = $request->validate([
-            'product_id' => ['required', 'exists:product,id'],
-            'quantity' => ['required', 'integer', 'min:1'],
-        ]);
+        $cart = Cart::where('user_id', auth()->id())->first();
 
-        $user = User::user();
+        if (!$cart) {
+            return response()->json(['message' => 'Cart is empty']);
+        }
 
-        // $cartitem
+        $cartItem = Cart_Item::where('cart_id', $cart->id)->with('product')->get();
+
+        return response()->json(['cart' => $cart, 'items' => $cartItem]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function clearCart ()
     {
-        //
-    }
+        $user_id = auth()->id();
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
+        $cart = Cart::where('user_id', $user_id)->first();
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
+        if ($cart) {
+            Cart_Item::where('cart_id', $cart->id)->delete();
+        }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        return response()->json(['message' => 'Cart cleared successfully']);
     }
 }
