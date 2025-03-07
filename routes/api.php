@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\CartItemController;
+use App\Http\Controllers\Api\MidtransController;
 use App\Http\Controllers\Api\OrderController;
 
 Route::post('/register', [UserController::class, 'register']);
@@ -20,5 +21,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/cart/remove/{id}', [CartItemController::class, 'removeCartItem']);
     Route::delete('/cart/clear', [CartController::class, 'clearCart']);
     Route::post('/checkout', [OrderController::class, 'checkout']);
-    Route::post('/midtrans/callback', [OrderController::class, 'midtransCallback']);
+    Route::post('/callback', [OrderController::class, 'midtransCallback']);
 });
