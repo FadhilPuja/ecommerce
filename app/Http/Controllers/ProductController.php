@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
@@ -9,67 +10,56 @@ use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
         $products = Product::paginate(10);
-
         return view('admin.products.index', compact('products'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        return view('admin.products.create');
+        $categories = Category::all();
+        return view('admin.products.create', compact('categories'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function store(Request $request)    
     {
         $validatedData = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'description' => ['required', 'string'],
             'price' => ['required', 'numeric', 'min:0', 'max:99999999.99'],
             'stock' => ['required', 'integer'],
+            'category_id' => ['required', 'exists:categories,id'], 
             'image_url' => ['required', 'image', 'mimes:jpeg,png,jpg,gif,svg', 'max:2048'],
         ]);
 
         $validatedData['image_url'] = $request->file('image_url')->store('images', 'public');
-        Product::create($validatedData);
+
+        Product::create([
+            'name' => $validatedData['name'],
+            'description' => $validatedData['description'],
+            'price' => $validatedData['price'],
+            'stock' => $validatedData['stock'],
+            'category_id' => $validatedData['category_id'],
+            'image_url' => $validatedData['image_url'],
+        ]);
 
         return to_route('products.index')->with('success', 'Product created successfully');
     }
 
-
-    /**
-     * Display the specified resource.
-     */
     public function show($id)
     {
-        $products = Product::find($id);
-
-        return view('admin.products.show', compact('products'));
+        $product = Product::findOrFail($id);
+        return view('admin.products.show', compact('product'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit($id)
     {
-        $products = Product::find($id);
-
-        return view('admin.products.edit', compact('products'));
+        $product = Product::findOrFail($id);
+        $categories = Category::all();
+        return view('admin.products.edit', compact('product', 'categories'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, $id)
     {
         $validatedData = $request->validate([
@@ -77,30 +67,27 @@ class ProductController extends Controller
             'description' => ['required', 'string'],
             'price' => ['required', 'numeric', 'min:0', 'max:99999999.99'],
             'stock' => ['required', 'integer'],
-            'image_url' => ['required', 'image', 'mimes:jpeg,png,jpg,gif,svg', 'max:2048'],
+            'category_id' => ['required', 'exists:categories,id'], // Pastikan dikirim
+            'image_url' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,svg', 'max:2048'],
         ]);
 
-        $product = Product::find($id);
+        $product = Product::findOrFail($id);
 
         if ($request->hasFile('image_url')) {
-            // delete old image
             Storage::delete('public/' . $product->image_url);
-
-            // store new image
             $validatedData['image_url'] = $request->file('image_url')->store('images', 'public');
+        } else {
+            unset($validatedData['image_url']); // Jika tidak ada gambar baru, jangan ubah yang lama
         }
 
         $product->update($validatedData);
 
-        return to_route('products.index')->with('success', 'Book updated successfully');
+        return to_route('products.index')->with('success', 'Product updated successfully');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy($id)
     {
-        $product = Product::find($id);
+        $product = Product::findOrFail($id);
 
         Storage::delete('public/' . $product->image_url);
 

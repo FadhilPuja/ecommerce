@@ -9,7 +9,7 @@ return new class extends Migration {
     {
         Schema::create('midtrans_histories', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('order_id')->constrained('orders')->onDelete('cascade');
+            $table->string('order_id')->constrained('orders')->onDelete('cascade');
             $table->string('status');
             $table->json('payload');
             $table->timestamps();

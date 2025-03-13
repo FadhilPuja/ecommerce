@@ -10,10 +10,28 @@ class ProductController extends Controller
 {    
     public function index()
     {        
-        $products = Product::paginate();        
+        $products = Product::paginate(10);        
         
         return response()->json([
             'data' => $products
         ], );
     }
+
+    public function filter(Request $request)
+    {
+        $categoryId = $request->query('category_id');
+
+        if (!$categoryId) {
+            return response()->json([
+                'error' => 'Parameter category_id wajib diisi'
+            ], 400);
+        }
+
+        $products = Product::where('category_id', $categoryId)->paginate(10);
+
+        return response()->json([
+            'data' => $products
+        ]);
+    }
+
 }

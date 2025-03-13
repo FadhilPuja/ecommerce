@@ -2,27 +2,21 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Order;
-use App\Models\Product;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Routing\Controller;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
 
-class DashboardController extends Controller
+class CustomerController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        return view('admin.home.dashboard', [
-            'user' => Auth::user(),
-            'totalProducts' => Product::count(),
-            'totalOrders' => Order::count(),
-            'totalCustomers' => User::where('role', 'customer')->count(),
-        ]);
+        // Mengambil semua customer (User) dari database
+        $customers = User::all();
+
+        // Mengirim data customer ke view
+        return view('admin.customers.index', compact('customers'));
     }
 
     /**

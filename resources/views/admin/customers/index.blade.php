@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manajemen Produk</title>
+    <title>Manajemen Customer</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
-
     <style>
         .sidebar {
             width: 250px;
@@ -33,11 +32,11 @@
             margin-left: 260px;
             padding: 20px;
         }
-        .product-image {
-            width: 80px;
-            height: 80px;
+        .customer-image {
+            width: 50px;
+            height: 50px;
             object-fit: cover;
-            border-radius: 5px;
+            border-radius: 50%;
         }
     </style>
 </head>
@@ -59,61 +58,48 @@
     </div>
     <div class="content">
         <div class="container mt-4">
-            <h2>Daftar Produk</h2>
-            <a href="{{ route('products.create') }}" class="btn btn-success mb-3">Tambah Produk</a>
+            <h2>Daftar Customer</h2>
             @if(session('success'))
                 <div class="alert alert-success">{{ session('success') }}</div>
             @endif
-            <table id="productTable" class="table table-bordered">
+            <table id="customerTable" class="table table-bordered">
                 <thead class="table-dark">
                     <tr>
                         <th>#</th>
-                        <th>Gambar</th>
+                        <th>Foto</th>
                         <th>Nama</th>
-                        <th>Deskripsi</th>
-                        <th>Harga</th>
-                        <th>Stok</th>
-                        <th>Kategori</th>
-                        <th>Aksi</th>
+                        <th>Email</th>
+                        <th>Alamat</th>
+                        <th>Status</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach($products as $product)
+                    @foreach($customers as $customer)
                     <tr>
                         <td>{{ $loop->iteration }}</td>
                         <td>
-                            <img src="{{ asset('storage/' . $product->image_url) }}" class="product-image" alt="Product Image">
+                            <img src="{{ asset('storage/' . $customer->profile_image) }}" class="customer-image" alt="Customer Image">
                         </td>
-                        <td>{{ $product->name }}</td>
-                        <td>{{ $product->description }}</td>
-                        <td>Rp{{ number_format($product->price, 0, ',', '.') }}</td>
-                        <td>{{ $product->stock }}</td>  
-                        <td>{{ $product->category->name ?? 'Tidak Ada Kategori' }}</td> 
-                        <td>
-                            <a href="{{ route('products.show', $product->id) }}" class="btn btn-info btn-sm">Show</a>
-                            <a href="{{ route('products.edit', $product->id) }}" class="btn btn-warning btn-sm">Edit</a>
-                            <form action="{{ route('products.destroy', $product->id) }}" method="POST" class="d-inline">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Apakah Anda yakin ingin menghapus produk ini?')">Hapus</button>
-                            </form>
-                        </td>
+                        <td>{{ $customer->name }}</td>
+                        <td>{{ $customer->email }}</td>
+                        <td>{{ $customer->address }}</td>
+                        <td>{{ $customer->role }}</td>
                     </tr>
                     @endforeach
                 </tbody>
             </table>
-            @if($products->isEmpty())
-                <p class="text-center">Belum ada produk.</p>
+            @if($customers->isEmpty())
+                <p class="text-center">Belum ada customer.</p>
             @endif
         </div>
     </div>
-
+    
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
-
     <script>
-        $(document).ready(function() {
-            $('#productTable').DataTable();
+        $(document).ready(function () {
+            $('#customerTable').DataTable();
         });
     </script>
 </body>

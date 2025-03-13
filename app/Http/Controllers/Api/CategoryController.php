@@ -1,36 +1,36 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api;
 
-use App\Models\Order;
+use App\Http\Controllers\Controller;
+use App\Models\Category;
 use App\Models\Product;
-use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Routing\Controller;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
 
-class DashboardController extends Controller
+class CategoryController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        return view('admin.home.dashboard', [
-            'user' => Auth::user(),
-            'totalProducts' => Product::count(),
-            'totalOrders' => Order::count(),
-            'totalCustomers' => User::where('role', 'customer')->count(),
-        ]);
+        $category = Category::paginate(10);        
+        
+        return response()->json([
+            'data' => $category
+        ], );
     }
 
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
-    {
-        //
+    public function detail($category_id)
+    {        
+        $category = Category::with('products')->findOrFail($category_id);   
+        
+        return response()->json([
+            'data' => $category
+        ], );
     }
 
     /**

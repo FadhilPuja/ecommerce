@@ -3,26 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\Models\Order;
-use App\Models\Product;
-use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Routing\Controller;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
 
-class DashboardController extends Controller
+class OrderController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        return view('admin.home.dashboard', [
-            'user' => Auth::user(),
-            'totalProducts' => Product::count(),
-            'totalOrders' => Order::count(),
-            'totalCustomers' => User::where('role', 'customer')->count(),
-        ]);
+        $orders = Order::paginate(10);
+
+        return view('admin.order.index', compact('orders'));
     }
 
     /**
@@ -44,9 +36,10 @@ class DashboardController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show($id)
     {
-        //
+        $order = Order::with('orderDetails.product', 'user')->findOrFail($id);
+        return view('admin.order.show', compact('order'));
     }
 
     /**

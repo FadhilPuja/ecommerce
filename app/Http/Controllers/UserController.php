@@ -28,16 +28,15 @@ class UserController extends Controller
         ]);
 
         if (Auth::attempt($credential)) {
-            return redirect()->intended('dashboard')->with('success', 'You are logged in!');
-        }
-        if (!Auth::attempt($credential)) {
-            return back()->withErrors([
-                'email' => 'Your provided credentials do not match in our records.',
-            ])->onlyInput('email');
+            if (Auth::user()->role == 'admin') {
+                return redirect()->route('dashboard.index')->with('success', 'Anda berhasil login sebagai admin!');
+            }
+            return redirect()->intended('dashboard')->with('success', 'Anda berhasil login!');
         }
 
-        return to_route('dashboard')
-            ->withSuccess('You have successfully logged in!');
+        return back()->withErrors([
+            'email' => 'Kredensial yang Anda masukkan tidak cocok dengan catatan kami.',
+        ])->onlyInput('email');
     }
 
     public function register()

@@ -44,10 +44,9 @@
         <a href="{{ route('dashboard.index') }}"><i class="fa fa-home"></i> Dashboard</a>
         <a href="{{ route('products.index') }}"><i class="fa fa-box"></i> Products</a>
         <a href="{{ route('category.index') }}"><i class="fa fa-list"></i> Categories</a>
-        <a href=""><i class="fa fa-shopping-cart"></i> Orders</a>
-        <a href=""><i class="fa fa-users"></i> Customers</a>
-        <a href="#"><i class="fa fa-chart-line"></i> Report</a>
-        <a href="#"><i class="fa fa-gear"></i> Setting</a>
+        <a href="{{ route('order.index') }}"><i class="fa fa-shopping-cart"></i> Orders</a>
+        <a href="{{ route('customers.index') }}"><i class="fa fa-users"></i> Customers</a>
+        <a href="{{ route('setting.index') }}"><i class="fa fa-gear"></i> Setting</a>
         <hr>
         <form action="{{ route('auth.logout') }}" method="POST" class="d-grid p-2">
             @csrf

@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Cart_Item;
+use App\Models\MidtransHistory;
 use App\Models\Order;
 use App\Models\OrderDetail;
 use App\Models\Product;
@@ -20,7 +22,7 @@ class OrderController extends Controller
         Config::$serverKey = config('midtrans.server_key');
         Config::$isProduction = config('midtrans.is_production');
         Config::$isSanitized = config('midtrans.is_sanitized');
-        Config::$is3ds = config('midtrans.id_3ds');
+        Config::$is3ds = config('midtrans.is_3ds');
     }
 
     public function checkout(Request $request)
@@ -28,7 +30,6 @@ class OrderController extends Controller
         // Validasi request
         $request->validate([
             'user_id' => ['required', 'exists:users,id'],
-            'cart_items' => ['required', 'array'],
             'payment_method' => ['required', 'string'],
         ]);
 
@@ -37,7 +38,7 @@ class OrderController extends Controller
 
             $this->configureMidtrans(); // Konfigurasi Midtrans
 
-            // Cek apakah user sudah memiliki pesanan yang belum dibayar
+            // Cek apakah ada pesanan yang belum dibayar
             $existingOrder = Order::where('user_id', $request->user_id)
                 ->where('payment_status', 'Unpaid')
                 ->first();
@@ -51,10 +52,18 @@ class OrderController extends Controller
                 ], 400);
             }
 
+            // Ambil semua item dari cart berdasarkan user_id
+            $cartItems = Cart_Item::where('user_id', $request->user_id)->get();
+
+            if ($cartItems->isEmpty()) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Keranjang Anda kosong.',
+                ], 400);
+            }
+
             // Hitung total harga
-            $totalPrice = collect($request->cart_items)->sum(function ($item) {
-                return Product::findOrFail($item['product_id'])->price * $item['quantity'];
-            });
+            $totalPrice = $cartItems->sum(fn($item) => $item->total_price);
 
             // Buat order baru
             $order = Order::create([
@@ -66,17 +75,25 @@ class OrderController extends Controller
                 'transaction_id' => null,
             ]);
 
-            // Buat detail order
-            $this->createOrderDetails($request->cart_items, $order->id);
+            // Menyimpan order detail
+            foreach ($cartItems as $item) {
+                OrderDetail::create([
+                    'order_id' => $order->id,
+                    'product_id' => $item->product_id,
+                    'quantity' => $item->quantity,
+                    'subtotal' => $item->total_price,
+                ]);
+            }
 
-            // Buat transaksi ke Midtrans
-            $snapToken = $this->createMidtransTransaction($request, $order, $totalPrice);
-
-            // Update order dengan snap token dari Midtrans
+            // Buat transaksi di Midtrans
+            $snapToken = $this->createMidtransTransaction($cartItems, $order, $totalPrice);
             $order->update(['transaction_id' => $snapToken]);
 
+            // Hapus cart setelah checkout
+            Cart_Item::where('user_id', $request->user_id)->delete();
+
             DB::commit();
-            return response()->json([                
+            return response()->json([
                 'status' => 'success',
                 'message' => 'Pesanan berhasil dibuat. Silakan lakukan pembayaran.',
                 'total_bayar' => $totalPrice,
@@ -94,70 +111,88 @@ class OrderController extends Controller
         }
     }
 
-    public function midtransCallback(Request $request)
-    {
-        // Validasi tanda tangan Midtrans
-        Log::info('Midtrans Callback Data:', $request->all());
-        if (!$this->validateMidtransSignature($request)) {
-            return response()->json(['message' => 'Invalid signature'], 403);
-        }
-
-        // Ambil order berdasarkan transaction_id
-        $order = Order::where('transaction_id', $request->order_id)->firstOrFail();
-
-        // Update status pembayaran berdasarkan status transaksi Midtrans
-        $order->update([
-            'payment_status' => $request->transaction_status == 'settlement' ? 'Paid' : 'Unpaid',
-            'order_status' => $request->transaction_status == 'settlement' ? 'Shipping' : 'Cancelled'
-        ]);
-
-        return response()->json(['message' => 'Success']);
-    }
-
-    private function createOrderDetails($cartItems, $orderId)
-    {
-        foreach ($cartItems as $item) {
-            $product = Product::findOrFail($item['product_id']);
-            OrderDetail::create([
-                'order_id' => $orderId,
-                'product_id' => $product->id,
-                'quantity' => $item['quantity'],
-                'subtotal' => $product->price * $item['quantity'],
-            ]);
-        }
-    }
-
-    private function createMidtransTransaction($request, $order, $totalPrice)
+    private function createMidtransTransaction($cartItems, $order, $totalPrice)
     {
         $transaction = [
             'transaction_details' => [
-                'order_id' => 'ORDER-' . $order->id,
+                'order_id' => $order->id,
                 'gross_amount' => $totalPrice,
             ],
-            'item_details' => collect($request->cart_items)->map(function ($item) {
-                $product = Product::findOrFail($item['product_id']);
+            'item_details' => $cartItems->map(function ($item) {
                 return [
-                    'id' => $product->id,
-                    'price' => $product->price,
-                    'quantity' => $item['quantity'],
-                    'name' => $product->name,
+                    'id' => $item->product_id,
+                    'price' => $item->total_price / $item->quantity,
+                    'quantity' => $item->quantity,
+                    'name' => $item->product->name,
                 ];
             })->toArray(),
             'customer_details' => [
-                'first_name' => User::findOrFail($request->user_id)->name,
-                'email' => User::findOrFail($request->user_id)->email,
-                'phone' => User::findOrFail($request->user_id)->phone_number,
-                'address' =>User::findOrFail($request->user_id)->address,
+                'first_name' => $order->user->name,
+                'email' => $order->user->email,
+                'phone' => $order->user->phone_number,
+                'address' => $order->user->address,
             ],
         ];
 
         return Snap::getSnapToken($transaction);
     }
 
-    private function validateMidtransSignature($request)
+    public function callback(Request $request)
     {
-        $serverKey = config('midtrans.server_key');
-        $hashed = hash("sha512", $request->order_id . $request->status_code . $request->gross_amount . $serverKey);
-        return $hashed === $request->signature_key;
+        $payload = $request->all();
+        Log::info($payload);
+
+        try {
+            $orderId = $payload['order_id'];
+            $statusCode = $payload['status_code'];
+            $grossAmount = $payload['gross_amount'];
+            $paymentType = $payload['payment_type'];
+            $signatureKey = $payload['signature_key'];
+            $serverKey = config('midtrans.server_key');
+
+            $signature = hash('sha512', $orderId . $statusCode . $grossAmount . $serverKey);
+            if ($signature != $signatureKey) {
+                return response()->json(['message' => 'Invalid credentials'], 401);
+            }
+
+            $transactionStatus = $payload['transaction_status'];
+
+            MidtransHistory::create([
+                'order_id' => $orderId,
+                'status' => $transactionStatus,
+                'payload' => json_encode($payload),
+            ]);
+
+            $order = Order::find($orderId);
+            if (!$order) {
+                return response()->json(['message' => 'Invalid order / Order not found!'], 404);
+            }
+
+            if (in_array($transactionStatus, ['settlement', 'capture'])) {
+                $order->update([
+                    'order_status' => 'Shipping',
+                    'payment_status' => 'Paid',
+                    'payment_method' => $paymentType,
+                ]);
+
+                foreach ($order->orderDetails as $item) {
+                    $product = Product::find($item->product_id);
+                    if ($product) {
+                        $product->update(['quantity' => max(0, $product->quantity - $item->quantity)]);
+                    }
+                }
+            } elseif (in_array($transactionStatus, ['expire', 'failure', 'cancel', 'deny', 'pending'])) {
+                $order->update([
+                    'order_status' => 'Cancelled',
+                    'payment_status' => 'Unpaid',
+                    'payment_method' => $paymentType,
+                ]);
+            }
+
+            return response()->json(['status' => 'success', 'message' => 'Order updated successfully']);
+        } catch (\Exception $e) {
+            Log::error('Midtrans Callback Error: ' . $e->getMessage());
+            return response()->json(['status' => 'error', 'message' => 'Internal Server Error'], 500);
+        }
     }
 }
