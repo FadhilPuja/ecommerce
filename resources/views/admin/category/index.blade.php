@@ -9,11 +9,12 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <style>
+        /* Sidebar Styling */
         .sidebar {
             width: 250px;
             height: 100vh;
             position: fixed;
-            background-color: #343a40;
+            background-color: #2c3e50;
             color: white;
             padding-top: 20px;
         }
@@ -23,15 +24,30 @@
             font-size: 16px;
             color: white;
             display: block;
+            border-radius: 5px;
             transition: 0.3s;
         }
-        .sidebar a:hover {
-            background-color: #495057;
-            border-radius: 5px;
+        .sidebar a:hover, .sidebar .active {
+            background-color: #3d566e;
         }
         .content {
-            margin-left: 260px; /* Hindari tertutup sidebar */
+            margin-left: 260px;
             padding: 20px;
+        }
+        /* Table Styling */
+        .table {
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .table-hover tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+        .btn-sm {
+            padding: 6px 10px;
+            font-size: 14px;
+        }
+        .alert {
+            transition: opacity 0.5s ease-out;
         }
     </style>
 </head>
@@ -39,7 +55,7 @@
 
     <!-- Sidebar -->
     <div class="sidebar">
-        <h4 class="text-center">Admin Panel</h4>
+        <h4 class="text-center mb-4">Admin Panel</h4>
         <hr>
         <a href="{{ route('dashboard.index') }}"><i class="fa fa-home"></i> Dashboard</a>
         <a href="{{ route('products.index') }}"><i class="fa fa-box"></i> Products</a>
@@ -57,49 +73,73 @@
     <!-- Content -->
     <div class="content">
         <div class="container mt-4">
-            <h2>Kategori</h2>
-
-            <!-- Button Tambah -->
-            <a href="{{ route('category.create') }}" class="btn btn-success mb-3">Tambah Kategori</a>
+            <h2 class="mb-3">Manajemen Kategori</h2>
 
             <!-- Success Message -->
             @if(session('success'))
                 <div class="alert alert-success">{{ session('success') }}</div>
             @endif
 
-            <!-- Tabel Kategori -->
-            <table class="table table-bordered">
-                <thead class="table-dark">
-                    <tr>
-                        <th>#</th>
-                        <th>Nama Kategori</th>
-                        <th>Aksi</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($categories as $category)
-                    <tr>
-                        <td>{{ $loop->iteration }}</td>
-                        <td>{{ $category->name }}</td>
-                        <td>
-                            <a href="" class="btn btn-warning btn-sm">Edit</a>
-                            <form action="{{ route('category.destroy', $category->id) }}" method="POST" class="d-inline">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="btn btn-danger btn-sm">Hapus</button>
-                            </form>
-                        </td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
+            <!-- Button Tambah -->
+            <a href="{{ route('category.create') }}" class="btn btn-success mb-3">
+                <i class="fa fa-plus"></i> Tambah Kategori
+            </a>
 
-            @if($categories->isEmpty())
-                <p class="text-center">Belum ada kategori.</p>
-            @endif
+            <!-- Tabel Kategori -->
+            <div class="card shadow-sm p-3">
+                <table class="table table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>#</th>
+                            <th>Nama Kategori</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($categories as $category)
+                        <tr>
+                            <td>{{ $loop->iteration }}</td>
+                            <td>{{ $category->name }}</td>
+                            <td>                                
+                                <form action="{{ route('category.destroy', $category->id) }}" method="POST" class="d-inline delete-form">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-danger btn-sm">
+                                        <i class="fa fa-trash"></i> Hapus
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+
+                @if($categories->isEmpty())
+                    <p class="text-center text-muted">Belum ada kategori.</p>
+                @endif
+            </div>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Fade out alert success
+        setTimeout(() => {
+            let alert = document.querySelector(".alert");
+            if (alert) {
+                alert.style.opacity = "0";
+                setTimeout(() => alert.remove(), 500);
+            }
+        }, 3000);
+
+        // Konfirmasi sebelum menghapus kategori
+        document.querySelectorAll(".delete-form").forEach(form => {
+            form.addEventListener("submit", function(event) {
+                if (!confirm("Apakah Anda yakin ingin menghapus kategori ini?")) {
+                    event.preventDefault();
+                }
+            });
+        });
+    </script>
 </body>
 </html>

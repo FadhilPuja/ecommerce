@@ -11,7 +11,6 @@
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
 
     <style>
-        /* Sidebar Styles */
         .sidebar {
             width: 250px;
             height: 100vh;
@@ -21,56 +20,33 @@
             padding-top: 20px;
         }
         .sidebar a {
-            padding: 15px;
+            padding: 12px;
             text-decoration: none;
-            font-size: 18px;
+            font-size: 16px;
             color: white;
             display: block;
             border-radius: 5px;
-            transition: background-color 0.3s ease;
+            transition: 0.3s;
         }
-        .sidebar a:hover {
-            background-color: #34495e;
+        .sidebar a:hover, .sidebar .active {
+            background-color: #3d566e;
         }
-        .sidebar .active {
-            background-color: #1abc9c;
-        }
-
-        /* Content Section */
         .content {
-            margin-left: 250px;
-            padding: 30px;
+            margin-left: 260px;
+            padding: 20px;
         }
-        .content h2 {
-            font-size: 32px;
-            font-weight: 700;
+        .product-image {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 5px;
         }
-
-        /* Table Styles */
-        table.dataTable thead th {
-            background-color: #2980b9;
-            color: white;
-        }
-        table.dataTable tbody tr:hover {
-            background-color: #f8f9fa;
-        }
-        .badge {
-            font-size: 0.9em;
-        }
-
         .btn-custom {
-            background-color: #16a085;
+            background-color: #5d6d7e;
             color: white;
         }
         .btn-custom:hover {
-            background-color: #1abc9c;
-        }
-
-        /* Pagination Styling */
-        .pagination .page-item .page-link {
-            border: none;
-            background-color: #1abc9c;
-            color: white;
+            background-color: #85929e;
         }
     </style>
 </head>
@@ -82,7 +58,7 @@
         <a href="{{ route('dashboard.index') }}"><i class="fa fa-home"></i> Dashboard</a>
         <a href="{{ route('products.index') }}"><i class="fa fa-box"></i> Products</a>
         <a href="{{ route('category.index') }}"><i class="fa fa-list"></i> Categories</a>
-        <a href="{{ route('order.index') }}" class="active"><i class="fa fa-shopping-cart"></i> Orders</a>
+        <a href="{{ route('order.index') }}"><i class="fa fa-shopping-cart"></i> Orders</a>
         <a href="{{ route('customers.index') }}"><i class="fa fa-users"></i> Customers</a>
         <a href="{{ route('setting.index') }}"><i class="fa fa-cogs"></i> Settings</a>
         <hr class="border-light">
