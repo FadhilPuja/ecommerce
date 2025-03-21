@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\UsersExport;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 
 class CustomerController extends Controller
 {
@@ -17,6 +19,11 @@ class CustomerController extends Controller
 
         // Mengirim data customer ke view
         return view('admin.customers.index', compact('customers'));
+    }
+
+    public function export()
+    {
+        return Excel::download(new UsersExport, 'user.xlsx');
     }
 
     /**

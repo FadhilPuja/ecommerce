@@ -49,6 +49,20 @@
             transform: scale(1.05);
             transition: 0.3s ease-in-out;
         }
+        .notification-icon {
+            position: relative;
+        }
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: red;
+            color: white;
+            font-size: 12px;
+            padding: 4px 7px;
+            border-radius: 50%;
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -82,50 +96,80 @@
 
     <!-- Content -->
     <div class="content">
-        <div class="container mt-4">
+        <div class="container mt-4 d-flex justify-content-between align-items-center">
             <h2>Dashboard</h2>
-            <p>Welcome, <strong>{{ Auth::user()->name }}</strong></p>
 
-            <div class="row mt-4">
-                <!-- Total Products -->
-                <div class="col-md-4">
-                    <div class="card text-white bg-primary mb-3 shadow">
-                        <div class="card-body text-center">
-                            <h5 class="card-title"><i class="fa fa-box"></i> Total Products</h5>
-                            <h2>{{ $totalProducts }}</h2>
-                        </div>
-                    </div>
-                </div>
+            <!-- Bell Icon dengan Counter Notifikasi -->
+            <div class="notification-icon">
+                <a href="{{ route('notification.index') }}" class="text-dark">
+                    <i class="fa fa-bell fa-2x"></i>
+                    <span id="notificationCount" class="notification-badge">0</span>
+                </a>
+            </div>
+        </div>
 
-                <!-- Total Orders -->
-                <div class="col-md-4">
-                    <div class="card text-white bg-success mb-3 shadow">
-                        <div class="card-body text-center">
-                            <h5 class="card-title"><i class="fa fa-shopping-cart"></i> Total Orders</h5>
-                            <h2>{{ $totalOrders }}</h2>
-                        </div>
-                    </div>
-                </div>
+        <p>Welcome, <strong>{{ Auth::user()->name }}</strong></p>
 
-                <!-- Total Customers -->
-                <div class="col-md-4">
-                    <div class="card text-white bg-warning mb-3 shadow">
-                        <div class="card-body text-center">
-                            <h5 class="card-title"><i class="fa fa-users"></i> Total Customers</h5>
-                            <h2>{{ $totalCustomers }}</h2>
-                        </div>
+        <div class="row mt-4">
+            <!-- Total Products -->
+            <div class="col-md-4">
+                <div class="card text-white bg-primary mb-3 shadow">
+                    <div class="card-body text-center">
+                        <h5 class="card-title"><i class="fa fa-box"></i> Total Products</h5>
+                        <h2>{{ $totalProducts }}</h2>
                     </div>
                 </div>
             </div>
 
-            <div class="text-center mt-4">
-                <a href="{{ route('products.index') }}" class="btn btn-primary"><i class="fa fa-box"></i> Manage Products</a>
-                <a href="{{ route('order.index') }}" class="btn btn-success"><i class="fa fa-shopping-cart"></i> Manage Orders</a>
-                <a href="{{ route('customers.index') }}" class="btn btn-warning"><i class="fa fa-users"></i> Manage Customers</a>
+            <!-- Total Orders -->
+            <div class="col-md-4">
+                <div class="card text-white bg-success mb-3 shadow">
+                    <div class="card-body text-center">
+                        <h5 class="card-title"><i class="fa fa-shopping-cart"></i> Total Orders</h5>
+                        <h2>{{ $totalOrders }}</h2>
+                    </div>
+                </div>
             </div>
+
+            <!-- Total Customers -->
+            <div class="col-md-4">
+                <div class="card text-white bg-warning mb-3 shadow">
+                    <div class="card-body text-center">
+                        <h5 class="card-title"><i class="fa fa-users"></i> Total Customers</h5>
+                        <h2>{{ $totalCustomers }}</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center mt-4">
+            <a href="{{ route('products.index') }}" class="btn btn-primary"><i class="fa fa-box"></i> Manage Products</a>
+            <a href="{{ route('order.index') }}" class="btn btn-success"><i class="fa fa-shopping-cart"></i> Manage Orders</a>
+            <a href="{{ route('customers.index') }}" class="btn btn-warning"><i class="fa fa-users"></i> Manage Customers</a>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function fetchNotifications() {
+            fetch('/admin/notification/unread-count')
+                .then(response => response.json())
+                .then(data => {
+                    let count = data.count;
+                    let badge = document.getElementById('notificationCount');
+                    if (count > 0) {
+                        badge.innerText = count;
+                        badge.style.display = 'inline-block';
+                    } else {
+                        badge.style.display = 'none';
+                    }
+                })
+                .catch(error => console.error('Error fetching notifications:', error));
+        }
+
+        setInterval(fetchNotifications, 5000);
+        fetchNotifications();
+    </script>
+
 </body>
 </html>

@@ -6,8 +6,6 @@
     <title>Order List</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    
-    <!-- DataTable CSS -->
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
 
     <style>
@@ -35,18 +33,12 @@
             margin-left: 260px;
             padding: 20px;
         }
-        .product-image {
-            width: 80px;
-            height: 80px;
-            object-fit: cover;
-            border-radius: 5px;
-        }
-        .btn-custom {
-            background-color: #5d6d7e;
+        .btn-export {
+            background-color: #28a745;
             color: white;
         }
-        .btn-custom:hover {
-            background-color: #85929e;
+        .btn-export:hover {
+            background-color: #218838;
         }
     </style>
 </head>
@@ -58,7 +50,7 @@
         <a href="{{ route('dashboard.index') }}"><i class="fa fa-home"></i> Dashboard</a>
         <a href="{{ route('products.index') }}"><i class="fa fa-box"></i> Products</a>
         <a href="{{ route('category.index') }}"><i class="fa fa-list"></i> Categories</a>
-        <a href="{{ route('order.index') }}"><i class="fa fa-shopping-cart"></i> Orders</a>
+        <a href="{{ route('order.index') }}" class="active"><i class="fa fa-shopping-cart"></i> Orders</a>
         <a href="{{ route('customers.index') }}"><i class="fa fa-users"></i> Customers</a>
         <a href="{{ route('setting.index') }}"><i class="fa fa-cogs"></i> Settings</a>
         <hr class="border-light">
@@ -68,10 +60,16 @@
         </form>
     </div>
 
-    <!-- Content -->
     <div class="content">
         <div class="container">
             <h2>Order List</h2>
+
+            <div class="mb-3">
+                <a href="{{ route('order.export') }}" class="btn btn-success">
+                    <i class="fa-solid fa-file-export"></i> Export Orders
+                </a>
+            </div>
+
             <table id="orderTable" class="table table-striped">
                 <thead>
                     <tr>
@@ -114,9 +112,7 @@
         </div>
     </div>
 
-    <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <!-- DataTable JS -->
     <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
 
     <script>

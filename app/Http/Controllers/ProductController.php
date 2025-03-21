@@ -2,18 +2,41 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\ProductExport;
+use App\Imports\ProductImport;
+use App\Mail\ProductNotification;
 use App\Models\Category;
+use App\Models\Notification;
 use App\Models\Product;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ProductController extends Controller
 {
     public function index()
     {
-        $products = Product::paginate(10);
+        $products = Product::paginate();
         return view('admin.products.index', compact('products'));
+    }
+
+    public function export()
+    {
+        return Excel::download(new ProductExport, 'product.xlsx');
+    }
+
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,csv',
+        ]);
+
+        Excel::import(new ProductImport, $request->file('file'));
+
+        return back()->with('success', 'Produk berhasil diimport!');
     }
 
     public function create()
@@ -22,27 +45,44 @@ class ProductController extends Controller
         return view('admin.products.create', compact('categories'));
     }
 
-    public function store(Request $request)    
+    public function store(Request $request)
     {
         $validatedData = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'description' => ['required', 'string'],
             'price' => ['required', 'numeric', 'min:0', 'max:99999999.99'],
             'stock' => ['required', 'integer'],
-            'category_id' => ['required', 'exists:categories,id'], 
+            'category_id' => ['required', 'exists:categories,id'],
             'image_url' => ['required', 'image', 'mimes:jpeg,png,jpg,gif,svg', 'max:2048'],
         ]);
 
         $validatedData['image_url'] = $request->file('image_url')->store('images', 'public');
 
-        Product::create([
+        $product = Product::create([
             'name' => $validatedData['name'],
             'description' => $validatedData['description'],
             'price' => $validatedData['price'],
             'stock' => $validatedData['stock'],
             'category_id' => $validatedData['category_id'],
             'image_url' => $validatedData['image_url'],
-        ]);
+        ]);       
+        
+        $customers = User::where('role', 'customer')->get();        
+
+        foreach ($customers as $index => $customer) {
+            Notification::create([
+                'user_id' => $customer->id,
+                'type' => 'New Product',
+                'message' => "Produk {$product->name} dengan kategori {$product->category->name} baru saja ditambahkan",
+                'is_read' => false,
+            ]);
+        
+            Mail::to($customer->email)->send(new ProductNotification($product, $customer->name));
+        
+            if ($index < count($customers) - 1) {
+                sleep(1);
+            }
+        }        
 
         return to_route('products.index')->with('success', 'Product created successfully');
     }

@@ -17,6 +17,8 @@ class SettingController extends Controller
         ]);
     }
 
+    
+
     public function update(Request $request)
     {
         $user = Auth::user(); // Ambil user yang sedang login

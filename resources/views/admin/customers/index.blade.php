@@ -60,7 +60,7 @@
         <a href="{{ route('products.index') }}"><i class="fa fa-box"></i> Products</a>
         <a href="{{ route('category.index') }}"><i class="fa fa-list"></i> Categories</a>
         <a href="{{ route('order.index') }}"><i class="fa fa-shopping-cart"></i> Orders</a>
-        <a href="{{ route('customers.index') }}"><i class="fa fa-users"></i> Customers</a>
+        <a href="{{ route('customers.index') }}" class="active"><i class="fa fa-users"></i> Customers</a>
         <a href="{{ route('setting.index') }}"><i class="fa fa-gear"></i> Setting</a>
         <hr>
         <form action="{{ route('auth.logout') }}" method="POST" class="d-grid p-2">
@@ -76,7 +76,13 @@
             @if(session('success'))
                 <div class="alert alert-success">{{ session('success') }}</div>
             @endif
-            
+
+            <div class="d-flex justify-content-between mb-3">
+                <a href="{{ route('customers.export') }}" class="btn btn-success">
+                    <i class="fa-solid fa-file-export"></i> Export Data
+                </a>
+            </div>
+
             <div class="card shadow-sm p-3">
                 <table id="customerTable" class="table table-striped">
                     <thead class="table-dark">
@@ -94,7 +100,7 @@
                         <tr>
                             <td>{{ $loop->iteration }}</td>
                             <td>
-                                <img src="{{ $customer->profile_image ? asset('storage/' . $customer->profile_image) : 'https://via.placeholder.com/50' }}" 
+                                <img src="{{ $customer->profile_image ? asset('storage/' . $customer->profile_image) : 'https://via.placeholder.com/50' }}"
                                      class="customer-image" alt="Customer Image">
                             </td>
                             <td>{{ $customer->name }}</td>
@@ -111,7 +117,7 @@
             </div>
         </div>
     </div>
-    
+
     <!-- Scripts -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

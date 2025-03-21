@@ -11,10 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('detail_categories', function (Blueprint $table) {
+        Schema::create('notifications', function (Blueprint $table) {
             $table->id();
 
-            $table->
+            $table->foreignId('user_id')->nullable()->constrained()->onDelete('cascade');
+            $table->string('type')->default('general');
+            $table->text('message');
+            $table->boolean('is_read')->default(false);
 
             $table->timestamps();
         });
@@ -25,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('detail_categories');
+        Schema::dropIfExists('notifications');
     }
 };

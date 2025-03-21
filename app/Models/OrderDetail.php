@@ -16,10 +16,6 @@ class OrderDetail extends Model
         'subtotal',
     ];
 
-    protected $guarded = [
-        'id',
-    ];
-
     protected $casts = [
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
@@ -34,7 +30,7 @@ class OrderDetail extends Model
     // Relasi dengan Product
     public function product()
     {
-        return $this->belongsTo(Product::class);
+        return $this->belongsTo(Product::class, 'product_id', 'id');
     }
 
     public static function boot()

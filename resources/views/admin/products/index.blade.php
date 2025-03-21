@@ -39,13 +39,6 @@
             object-fit: cover;
             border-radius: 5px;
         }
-        .btn-custom {
-            background-color: #5d6d7e;
-            color: white;
-        }
-        .btn-custom:hover {
-            background-color: #85929e;
-        }
     </style>
 </head>
 <body>
@@ -69,7 +62,13 @@
         <div class="container">
             <h2>Daftar Produk</h2>
             <a href="{{ route('products.create') }}" class="btn btn-success mb-3">
-                <i class="fa fa-plus"></i>Tambah Produk
+                <i class="fa fa-plus"></i> Tambah Produk
+            </a>
+            <a href="{{ route('products.export') }}" class="btn btn-success mb-3">
+                <i class="fa-solid fa-file-export"></i> Export
+            </a>
+            <a href="#" data-bs-toggle="modal" data-bs-target="#importModal" class="btn btn-primary mb-3">
+                <i class="fa-solid fa-upload"></i> Import
             </a>
             <table id="productTable" class="table table-striped">
                 <thead>
@@ -89,7 +88,7 @@
                     <tr>
                         <td>{{ $loop->iteration }}</td>
                         <td>
-                            <img src="{{ asset('storage/' . $product->image_url) }}" class="product-image" alt="Product Image" width="60">
+                            <img src="{{ asset('storage/' . $product->image_url) }}" class="product-image" alt="Product Image">
                         </td>
                         <td>{{ $product->name }}</td>
                         <td>{{ $product->description }}</td>
@@ -112,6 +111,31 @@
         </div>
     </div>
 
+    <div class="modal fade" id="importModal" tabindex="-1" aria-labelledby="importModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="importModalLabel">Import Produk</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="{{ route('products.import') }}" method="POST" enctype="multipart/form-data">
+                    @csrf
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label>Pilih file</label>
+                            <input type="file" class="form-control" id="importFile" name="file" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary">Import</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
     <script>

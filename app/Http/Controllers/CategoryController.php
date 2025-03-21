@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Imports\CategoryImport;
+use App\Exports\CategoryExport;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Maatwebsite\Excel\Facades\Excel;
 
 class CategoryController extends Controller
 {
@@ -16,6 +19,22 @@ class CategoryController extends Controller
         $categories = Category::paginate(10);
 
         return view('admin.category.index', compact('categories'));
+    }
+
+    public function export()
+    {
+        return Excel::download(new CategoryExport, 'category.xlsx');
+    }
+
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,csv|max:2048'
+        ]);
+
+        Excel::import(new CategoryImport, $request->file('file'));
+
+        return back()->with('success', 'Data berhasil diimport!');
     }
 
     /**

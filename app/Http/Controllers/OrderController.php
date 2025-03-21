@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\OrderExport;
 use App\Models\Order;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 
 class OrderController extends Controller
 {
@@ -15,6 +17,11 @@ class OrderController extends Controller
         $orders = Order::paginate(10);
 
         return view('admin.order.index', compact('orders'));
+    }
+
+    public function export()
+    {
+        return Excel::download(new OrderExport, 'orders.xlsx');
     }
 
     /**
